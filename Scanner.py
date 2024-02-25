@@ -48,7 +48,6 @@ class Scanner:
     def scan_token(self):
         # Next character from the source code
         c = self.advance()
-
         # Check the type of the token based on the current character
         if c == '(':
             # Add a LEFT_PAREN token to the list of tokens
@@ -83,6 +82,12 @@ class Scanner:
         elif c == '^':
             # Add a CARET token to the list of tokens
             self.add_token(TokenType.CARET)
+        elif c == '&':
+            # Add a AND token to the list of tokens
+            self.add_token(TokenType.AMPERSAND)
+        elif c == '|':
+            # Add a OR token to the list of tokens
+            self.add_token(TokenType.PIPE)
         elif c == '!':
             # Check if the next character is '=', then add a BANG_EQUAL token,
             # otherwise, add a BANG token

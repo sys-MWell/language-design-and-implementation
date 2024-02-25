@@ -102,6 +102,9 @@ class Expr(ABC):
         def accept(self, visitor):
             return visitor.visitLogicalExpr(self)
 
+        def __str__(self):
+            return f"({self.left} {self.operator.lexeme} {self.right})"
+
     # Set expression - Property assignment
     # Expr object, Token name, Expr value
     # Left side of an assignment
@@ -146,6 +149,10 @@ class Expr(ABC):
         def accept(self, visitor):
             return visitor.visitUnaryExpr(self)
 
+        def __str__(self):
+            return f"({self.operator.lexeme} {self.right})"
+
+    # Variable expression
     class Variable():
         def __init__(self, name):
             self.name = name

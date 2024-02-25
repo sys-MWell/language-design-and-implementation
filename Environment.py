@@ -25,5 +25,3 @@ class Environment:
             return
 
         raise RuntimeError(name, f"Undefined variable '{name.lexeme}'.")
-
-

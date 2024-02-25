@@ -17,9 +17,11 @@ class Interpreter():
         elif isinstance(expr, Expr.Grouping):
             return self.evaluate(expr.expression)
         elif isinstance(expr, Expr.Literal):
-            return expr.value
+            return self.visitLiteralExpr(expr)
         elif isinstance(expr, Expr.Unary):
             return self.visitUnaryExpr(expr)
+        elif isinstance(expr, Expr.Logical):
+            return self.visitLogicalExpr(expr)
 
     def execute(self, stmt):
         stmt.accept(self)
@@ -65,6 +67,23 @@ class Interpreter():
             # Unexpected operator found
             print(f"Unexpected operator {expr}")
             return
+
+    def visitLiteralExpr(self, expr):
+        return expr.value
+
+    def visitLogicalExpr(self, expr):
+        left = self.evaluate(expr.left)
+
+        # If operator is 'or' or '|' pipe (same thing) types
+        if expr.operator.type == TokenType.OR or expr.operator.type == TokenType.PIPE:
+            if self.is_truthy(left):
+                return left
+        # Else so 'and' or '&' (AMPERSAND) types
+        else:
+            if not self.is_truthy(left):
+                return left
+
+        return self.evaluate(expr.right)
 
     # Evaluate unary expression
     def visitUnaryExpr(self, expr):

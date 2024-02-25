@@ -50,6 +50,7 @@ def run(source):
     interpreter.interpret(statements)
     print()
 
+
 def report(line, where, message):
     # Report any errors to console and handle with hadError variable
     sys.stderr.write(f"[line {line}] Error {where}: {message}\n")
@@ -63,6 +64,7 @@ def error(token, message):
         report(token.line, " at end", message)
     else:
         report(token.line, f" at '{token.lexeme}'", message)
+
 
 def runtime_error(error):
     print(f"{error.message}\n[line {error.token.line}]")

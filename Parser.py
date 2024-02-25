@@ -24,7 +24,29 @@ class Parser:
 
     # Parsing the top-level expression
     def expression(self):
-        return self.equality()
+        return self.logical_or()
+
+    # Parsing logical OR expression: handles 'or' operators
+    def logical_or(self):
+        expr = self.logical_and()
+
+        while self.match(TokenType.OR, TokenType.PIPE):
+            operator = self.previous()
+            right = self.logical_and()
+            expr = Expr.Logical(expr, operator, right)
+
+        return expr
+
+    # Parsing logical AND expression: handles 'and' operators
+    def logical_and(self):
+        expr = self.equality()
+
+        while self.match(TokenType.AND, TokenType.AMPERSAND):
+            operator = self.previous()
+            right = self.equality()
+            expr = Expr.Logical(expr, operator, right)
+
+        return expr
 
     # Parsing equality expression: handles equality operators like '!=' (not equal) and '==' (equal equal)
     def equality(self):
@@ -85,7 +107,12 @@ class Parser:
 
     # Parsing unary expressions: handles unary operators like '!' (logical NOT) and '-' (negation)
     def unary(self):
-        if self.match(TokenType.MINUS):
+        # Handle '!' operator
+        if self.match(TokenType.BANG):
+            operator = self.previous()
+            right = self.unary()
+            return Expr.Unary(operator, right)
+        elif self.match(TokenType.MINUS):
             operator = self.previous()
             right = self.unary()
             return Expr.Unary(operator, right)

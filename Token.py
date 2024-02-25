@@ -2,7 +2,6 @@ from TokenType import TokenType
 
 class Token:
     # Class for token in the source code
-
     def __init__(self, type: TokenType, lexeme: str, literal: object, line: int):
         self.type = type  # Token type (e.g., TokenType.IDENTIFIER, TokenType.NUMBER)
         self.lexeme = lexeme  # The actual text of the token
