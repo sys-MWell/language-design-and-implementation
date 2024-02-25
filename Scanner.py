@@ -2,6 +2,8 @@ from TokenType import TokenType  # Importing the TokenType class from TokenType 
 from Token import Token  # Importing the Token class from Token module
 
 class Scanner:
+    class ParseError(RuntimeError):
+        pass
     def __init__(self, source):
         self.source = source  # The source code to be scanned
         self.tokens = []  # List to store the scanned tokens
@@ -122,7 +124,7 @@ class Scanner:
             self.identifier()
         else:
             # Unexpected character
-            print(f"Unexpected character at line {self.line} with being {c}")
+            raise self.ParseError(f"Unexpected character at line {self.line} with being {c}")
             return
 
     # Advance to the next character in the source code

@@ -13,13 +13,13 @@ class Interpreter():
     # Evaluate expressions, select evaluation method based on expression type
     def evaluate(self, expr):
         if isinstance(expr, Expr.Binary):
-            return self.evaluate_binary(expr)
+            return self.visitBinaryExpr(expr)
         elif isinstance(expr, Expr.Grouping):
             return self.evaluate(expr.expression)
         elif isinstance(expr, Expr.Literal):
             return expr.value
         elif isinstance(expr, Expr.Unary):
-            return self.evaluate_unary(expr)
+            return self.visitUnaryExpr(expr)
 
     def execute(self, stmt):
         stmt.accept(self)
@@ -35,7 +35,7 @@ class Interpreter():
         return None
 
     # Evaluate binary expressions
-    def evaluate_binary(self, expr):
+    def visitBinaryExpr(self, expr):
         # Left and right binary expression
         left = self.evaluate(expr.left)
         right = self.evaluate(expr.right)
@@ -67,7 +67,7 @@ class Interpreter():
             return
 
     # Evaluate unary expression
-    def evaluate_unary(self, expr):
+    def visitUnaryExpr(self, expr):
         right = self.evaluate(expr.right)
 
         if expr.operator.type == TokenType.BANG:
