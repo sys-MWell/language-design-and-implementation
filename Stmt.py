@@ -31,7 +31,9 @@ class Stmt(ABC):
             return visitor.visitClassStmt(self)
 
     # Represents an expression statement
-    # expression ";"
+    # Expression ";"
+    # Called from Interpreter.Accept - Checks expression
+    # If expression accepted, call function visitExpressionStmt within interpreter
     class Expression():
         def __init__(self, expression):
             self.expression = expression
@@ -101,6 +103,9 @@ class Stmt(ABC):
 
         def accept(self, visitor):
             return visitor.visitVarStmt(self)
+
+        def __str__(self):
+            return f"{str(self.name)} {str(self.initialiser)}"
 
     # Represents a while loop statement
     # "while" "(" expression ")" statement

@@ -92,7 +92,7 @@ class Expr(ABC):
             return str(self.value)
 
     # Logical expression
-    # Expression left, operator, expression right
+    # Expression left, operator, expression right, (AND, OR)
     class Logical():
         def __init__(self, left, operator, right):
             self.left = left
@@ -153,9 +153,14 @@ class Expr(ABC):
             return f"({self.operator.lexeme} {self.right})"
 
     # Variable expression
+    # E.g. 'var 1 = 3';
     class Variable():
         def __init__(self, name):
             self.name = name
 
         def accept(self, visitor):
             return visitor.visitVariableExpr(self)
+
+        # Return as string when printing
+        def __str__(self):
+            return str(self.name)

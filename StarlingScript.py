@@ -14,8 +14,10 @@ def main():
 
     # Get the path to the test file from the command line argument
     test_file = 'test_cases.txt'
+
     # Run the test file
     run_file(test_file)
+    #run_input()
 
 
 def run_file(path):
@@ -23,16 +25,23 @@ def run_file(path):
     with open(path, 'r') as file:
         # Iterate over each line in the file
         for line in file:
+            # Remove trailing whitespace (including newline character)
+            line = line.rstrip()
             # Run the scanner on the current line
             run(line)
             # Check if an error occurred during scanning
             if hadError:
                 sys.exit(65)  # Exit with status code 65 (data format error)
 
+def run_input():
+    userinput = input()
+    run(userinput)
+    run_input()
+
 
 def run(source):
     # Create a scanner object with the provided source code
-    print(f"source: {source}", end="")
+    print(f"source: {source}")
     scanner = Scanner(source)
     # Get the tokens by scanning the source code
     tokens = scanner.scan_tokens()
@@ -41,7 +50,8 @@ def run(source):
     # Expression parser
     parser = Parser(tokens)
     statements = parser.parse()
-    print(f"expression: {statements[0]}")
+    for statement in statements:
+        print(f"expression: {statement}")
     # Stop if there was a syntax error
     if hadError:
         print("Error")

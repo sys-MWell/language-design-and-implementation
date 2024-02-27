@@ -1,3 +1,4 @@
+# Parser.py
 from TokenType import TokenType
 from Token import Token
 from Expr import Expr
@@ -19,12 +20,22 @@ class Parser:
         statements = []
         # While not at end of token
         while not self.is_at_end():
-            statements.append(self.statement())
+            statements.append(self.declaration())
         return statements
 
     # Parsing the top-level expression
     def expression(self):
         return self.logical_or()
+
+    def declaration(self):
+        try:
+            if self.match(TokenType.VAR):
+                return self.var_declaration()
+
+            return self.statement()
+        except self.ParseError:
+            self.synchronise()
+            return None
 
     # Parsing logical OR expression: handles 'or' operators
     def logical_or(self):
@@ -139,26 +150,39 @@ class Parser:
         expr_stmt = Stmt.Expression(expr)  # Return an Expression statement with the parsed expression
         return expr_stmt
 
+    # Parse variables
+    def var_declaration(self):
+        name = self.consume(TokenType.IDENTIFIER, "Expect variable name.")
+
+        initializer = None
+        if self.match(TokenType.EQUAL):
+            initializer = self.expression()
+
+        self.consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.")
+        return Stmt.Var(name, initializer)
+
     # Parsing primary expressions, number, strings, false, true and NIL
     def primary(self):
+        # If match FALSE token
         if self.match(TokenType.FALSE):
             return Expr.Literal(False)
+        # If match TRUE token
         if self.match(TokenType.TRUE):
             return Expr.Literal(True)
+        # If match NIL token
         if self.match(TokenType.NIL):
             return Expr.Literal(None)
-
+        # If match NUMBER or STRING token - Handle literal numbers
         if self.match(TokenType.NUMBER) or self.match(TokenType.STRING):
             return Expr.Literal(self.previous().literal)
-
+        # If match IDENTIFIER token
+        if self.match(TokenType.IDENTIFIER):
+            return Expr.Variable(self.previous())
+        # If match LEFT_PAREN token
         if self.match(TokenType.LEFT_PAREN):
             expr = self.expression()
             self.consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.")
             return Expr.Grouping(expr)
-
-        # Handle literal numbers
-        if self.match(TokenType.NUMBER):
-            return Expr.Literal(self.previous().literal)
 
         raise self.error(self.peek(), "Expect expression.")
 

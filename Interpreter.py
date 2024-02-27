@@ -1,8 +1,13 @@
+# Interpreter.py
 from TokenType import TokenType
 from Expr import Expr
 from Stmt import Stmt
+from Environment import Environment
+
 
 class Interpreter():
+    environment = Environment(enclosing=None)
+    # Interpret expressions - Begin with execute function
     def interpret(self, statements):
         try:
             for statement in statements:
@@ -12,28 +17,51 @@ class Interpreter():
 
     # Evaluate expressions, select evaluation method based on expression type
     def evaluate(self, expr):
+        # Evaluate Binary Expression
         if isinstance(expr, Expr.Binary):
             return self.visitBinaryExpr(expr)
+        # Evaluate Grouping - Using parentheses to group expressions - "(" expression ")"
         elif isinstance(expr, Expr.Grouping):
             return self.evaluate(expr.expression)
+        # Evaluate Literal Expression - Numbers, strings, Booleans, and nil
         elif isinstance(expr, Expr.Literal):
             return self.visitLiteralExpr(expr)
+        # Evaluate Unary Expression - ( "-" | "!" ) expression
         elif isinstance(expr, Expr.Unary):
             return self.visitUnaryExpr(expr)
+        # Evaluate Logical Expression - ('AND', 'OR')
         elif isinstance(expr, Expr.Logical):
             return self.visitLogicalExpr(expr)
+        # Evaluate Variable Expression
+        elif isinstance(expr, Expr.Variable):
+            return self.visitVariableExpr(expr)
 
+    # Execute - Accept Expressions
     def execute(self, stmt):
         stmt.accept(self)
 
+    # Load expressions - Call evaluate function - Evaluates expression type
+    # Return object type
     def visitExpressionStmt(self, stmt):
-        return_binary = self.evaluate(stmt.expression)
-        print(f"Expression statement: {self.stringify(return_binary)}")
-        return return_binary
+        return_statement = self.evaluate(stmt.expression)
+        print(f"Expression statement: {self.stringify(return_statement)}")
+        return return_statement
 
+    # Print statement’s visit method - Print outcome
+    # Convert value to a string using the stringify() function
     def visitPrintStmt(self, stmt):
         value = self.evaluate(stmt.expression)
         print(f"Print statement: {self.stringify(value)}")
+        return None
+
+    # New syntax tree - Declaration statements
+    # If variable has initialiser, evaluate it, if not other choice
+    def visitVarStmt(self, stmt):
+        value = None
+        if stmt.initialiser:
+            value = self.evaluate(stmt.initialiser)
+
+        self.environment.define(stmt.name.lexeme, value)
         return None
 
     # Evaluate binary expressions
@@ -68,14 +96,17 @@ class Interpreter():
             print(f"Unexpected operator {expr}")
             return
 
+    # Convert the literal tree node into a runtime value using Expr.Value
     def visitLiteralExpr(self, expr):
         return expr.value
 
+    # Load logical expressions - 'OR', '|', 'AND', '&'
     def visitLogicalExpr(self, expr):
         left = self.evaluate(expr.left)
 
         # If operator is 'or' or '|' pipe (same thing) types
         if expr.operator.type == TokenType.OR or expr.operator.type == TokenType.PIPE:
+            # Check if value to the left is true or false
             if self.is_truthy(left):
                 return left
         # Else so 'and' or '&' (AMPERSAND) types
@@ -85,7 +116,7 @@ class Interpreter():
 
         return self.evaluate(expr.right)
 
-    # Evaluate unary expression
+    # Evaluate unary expression - ( "-" | "!" ) expression
     def visitUnaryExpr(self, expr):
         right = self.evaluate(expr.right)
 
@@ -93,6 +124,11 @@ class Interpreter():
             return not self.is_truthy(right)
         elif expr.operator.type == TokenType.MINUS:
             return -right
+
+    # Evaluate a variable expression
+    # Forwards to Environment - make sure the variable is defined
+    def visitVariableExpr(self, expr):
+        return self.environment.get(expr.name)
 
     # Truthiness and falsiness
     # Something other than true or false in a logic operation like !
