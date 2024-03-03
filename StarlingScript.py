@@ -3,6 +3,7 @@ from Scanner import Scanner  # Scanner class
 from TokenType import TokenType
 from Parser import Parser
 from Interpreter import Interpreter
+from AstPrinter import AstPrinter
 
 hadError = False  # Track errors
 

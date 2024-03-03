@@ -11,7 +11,7 @@ class Interpreter():
     def interpret(self, statements):
         try:
             for statement in statements:
-                self.execute(statement)
+                return self.execute(statement)
         except RuntimeError as error:
             print(f"\033[91mErrror: {error}\033[0m")
 
@@ -38,7 +38,7 @@ class Interpreter():
 
     # Execute - Accept Expressions
     def execute(self, stmt):
-        stmt.accept(self)
+        return stmt.accept(self)
 
     # Load expressions - Call evaluate function - Evaluates expression type
     # Return object type

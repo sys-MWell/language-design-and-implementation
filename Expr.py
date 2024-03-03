@@ -23,9 +23,6 @@ class Expr(ABC):
             self.name = name
             self.value = value
 
-        def accept(self, visitor):
-            return visitor.visitAssignExpr(self)
-
     # Binary expression
     # The infix arithmetic (+, -, *, /) and logic operators (==, !=, <, <=, >, >=)
     # Expression, operator, expression
@@ -34,9 +31,6 @@ class Expr(ABC):
             self.left = left
             self.operator = operator
             self.right = right
-
-        def accept(self, visitor):
-            return visitor.visitBinaryExpr(self)
 
         def __str__(self):
             return f"({self.operator.lexeme} {self.left} {self.right})"
@@ -50,9 +44,6 @@ class Expr(ABC):
             self.paren = paren
             self.arguments = arguments
 
-        def accept(self, visitor):
-            return visitor.visitCallExpr(self)
-
     # Get expression
     # Property access, or “get” expressions
     # Expression object, token name
@@ -61,18 +52,12 @@ class Expr(ABC):
             self.object = object
             self.name = name
 
-        def accept(self, visitor):
-            return visitor.visitGetExpr(self)
-
     # Grouping expression
     # Using parentheses to group expressions
     # "(" expression ")"
     class Grouping():
         def __init__(self, expression):
             self.expression = expression
-
-        def accept(self, visitor):
-            return visitor.visitGroupingExpr(self)
 
         def __str__(self):
             return str(self.expression)
@@ -85,9 +70,6 @@ class Expr(ABC):
         def __init__(self, value):
             self.value = value
 
-        def accept(self, visitor):
-            return visitor.visitLiteralExpr(self)
-
         def __str__(self):
             return str(self.value)
 
@@ -98,9 +80,6 @@ class Expr(ABC):
             self.left = left
             self.operator = operator
             self.right = right
-
-        def accept(self, visitor):
-            return visitor.visitLogicalExpr(self)
 
         def __str__(self):
             return f"({self.left} {self.operator.lexeme} {self.right})"
@@ -114,9 +93,6 @@ class Expr(ABC):
             self.name = name
             self.value = value
 
-        def accept(self, visitor):
-            return visitor.visitSetExpr(self)
-
     # Super expression
     # Token keyword, Token method
     # Used for a method call - super access followed by a function call
@@ -125,17 +101,11 @@ class Expr(ABC):
             self.keyword = keyword
             self.method = method
 
-        def accept(self, visitor):
-            return visitor.visitSuperExpr(self)
-
     # This expression
     # Evaluates to the instance that the method was called on
     class This():
         def __init__(self, keyword):
             self.keyword = keyword
-
-        def accept(self, visitor):
-            return visitor.visitThisExpr(self)
 
     # Unary expression
     # A prefix ! to perform a logical not, and - to negate a number
@@ -146,9 +116,6 @@ class Expr(ABC):
             self.operator = operator
             self.right = right
 
-        def accept(self, visitor):
-            return visitor.visitUnaryExpr(self)
-
         def __str__(self):
             return f"({self.operator.lexeme} {self.right})"
 
@@ -157,9 +124,6 @@ class Expr(ABC):
     class Variable():
         def __init__(self, name):
             self.name = name
-
-        def accept(self, visitor):
-            return visitor.visitVariableExpr(self)
 
         # Return as string when printing
         def __str__(self):

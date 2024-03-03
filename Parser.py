@@ -4,6 +4,11 @@ from Token import Token
 from Expr import Expr
 from typing import List
 from Stmt import Stmt
+'''
+Recursive descent - Top-down parser
+Fast, robust, and can support sophisticated error handling.
+Each method for parsing a grammar rule produces a syntax tree.
+'''
 
 class Parser:
     # Custom exception class for parse errors
@@ -187,6 +192,7 @@ class Parser:
         raise self.error(self.peek(), "Expect expression.")
 
     # Check if the current token matches any of the provided types
+    # If so consumes token, returns true. Otherwise, returns false
     def match(self, *types):
         for token_type in types:
             if self.check(token_type):
@@ -195,6 +201,7 @@ class Parser:
         return False
 
     # Check if the current token matches a specific type
+    # Returns true if the current token is of the given type, does not consume
     def check(self, token_type):
         if self.is_at_end():
             return False
@@ -207,14 +214,17 @@ class Parser:
         return self.previous()
 
     # Check if we have reached the end of the token list
+    # Parser checks if we’ve run out of tokens to parse
     def is_at_end(self):
         return self.peek().type == TokenType.EOF
 
     # Peek at the current token without advancing
+    # Returns the current token we have yet to consume
     def peek(self):
         return self.tokens[self.current]
 
     # Get the previous token
+    # Returns the most recently consumed token
     def previous(self):
         return self.tokens[self.current - 1]
 
