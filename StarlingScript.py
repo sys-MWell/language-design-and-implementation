@@ -8,17 +8,10 @@ from AstPrinter import AstPrinter
 hadError = False  # Track errors
 
 def main():
-    # Correct number of arguments provided
-    # if len(sys.argv) != 2:
-    #     print("Usage: python starling_script.py <test_file>")
-    #     sys.exit(64)  # Exit with status code 64 (command line usage error)
-
     # Get the path to the test file from the command line argument
     test_file = 'test_cases.txt'
 
-    # Run the test file
     run_file(test_file)
-    #run_input()
 
 
 def run_file(path):
