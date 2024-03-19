@@ -1,0 +1,28 @@
+var d = 0;
+var e = 5;
+
+while (d != e)
+{
+    d = d + 1;
+    print d;
+}
+print "d == e";
+
+{
+  var i = 0;
+  while (i < 10) {
+    print i;
+    i = i + 1;
+  }
+}
+
+print "End of while";
+
+print "Fibonacci sequence:";
+var a = 0;
+var temp;
+for (var b = 1; a < 10000; b = temp + b) {
+  print a;
+  temp = a;
+  a = b;
+}

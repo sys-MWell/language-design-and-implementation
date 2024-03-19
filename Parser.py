@@ -137,16 +137,91 @@ class Parser:
             return Expr.Unary(operator, right)
         return self.primary()
 
-    # Parse a single statement
-    def statement(self) -> Stmt.Print | Stmt.Expression | Stmt.Block:
+    # Parse chosen statements, if, print, block or expression
+    def statement(self) -> Stmt.Print | Stmt.Expression | Stmt.Block | Stmt.If | Stmt.While:
+        if self.match(TokenType.FOR):  # If the current token is a for statement
+            return self.for_statement()  # Parse and return a for statement
+        if self.match(TokenType.IF):  # If the current token is an if statement
+            return self.if_statement()  # Parse and return an if statement
         if self.match(TokenType.PRINT):  # If the current token is a print statement
             return self.print_statement()  # Parse and return a print statement
+        if self.match(TokenType.WHILE):  # If the current token is a while statement
+            return self.while_statement()  # Parse and return a while statement
         # Detect the beginning of a block by its leading token—in this case the {. In the statement() method
         # If indenting a block -> E.g. local variable scope
         if self.match(TokenType.LEFT_BRACE):
             block_stmt = Stmt.Block(self.block())
             return block_stmt
         return self.expression_statement()  # Otherwise, parse and return an expression statement
+
+    # Parse a for statement
+    # Translate (desugar) for loops to the while loops and other statements the interpreter already handles.
+    # Therefore, no alterations for while loops were made to the interpreter.
+    # Interpreter now supports C-style for loops
+    def for_statement(self):
+        self.consume(TokenType.LEFT_PAREN, "Expect '(' after 'for'.")
+
+        # Translate 'for' to 'while' initialiser.
+        # Check if token following the ( is a semicolon, if so initializer has been omitted.
+        # Otherwise, check for a var keyword see if variable declaration.
+        # If neither matched, must be expression.
+        # Parse that and wrap it in an expression statement so the initialiser is always of type Stmt.
+        if self.match(TokenType.SEMICOLON):
+            initialiser = None
+        elif self.match(TokenType.VAR):
+            initialiser = self.var_declaration()
+        else:
+            initialiser = self.expression_statement()
+
+        # Look for a semicolon to see if the clause has been omitted. The last clause is the increment.
+        condition = None
+        if not self.check(TokenType.SEMICOLON):
+            condition = self.expression()
+        self.consume(TokenType.SEMICOLON, "Expect ';' after loop condition.")
+
+        # Terminated by the closing parenthesis. All that remains is the body.
+        increment = None
+        if not self.check(TokenType.RIGHT_PAREN):
+            increment = self.expression()
+        self.consume(TokenType.RIGHT_PAREN, "Expect ')' after for clauses.")
+
+        # Resulting AST nodes sitting in a handful of local variables. Where translating begins, local variables used
+        # to synthesise syntax tree nodes that express the semantics of the for loop.
+        body = self.statement()
+        # Increment clause
+        if increment is not None:
+            body = Stmt.Block([
+                body,
+                Stmt.Expression(increment)])
+
+        # Take the condition and the body and build the loop using a while loop.
+        # If the condition is omitted, jam in true to make an infinite loop.
+        if condition is None:
+            condition = Expr.Literal(True)
+        body = Stmt.While(condition, body)
+
+        # Initialiser, it runs once before the entire loop. Then again by replacing the whole statement with a block
+        # that runs the initialiser.
+        if initialiser is not None:
+            body = Stmt.Block([initialiser, body])
+
+        return body
+
+    # Parse an if statement
+    # Detects an else clause by looking for the preceding else keyword.
+    # If there isn’t one, the elseBranch field in the syntax tree is null.
+    # The else is bound to the nearest if that precedes it.
+    def if_statement(self):
+        self.consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'.")
+        condition = self.expression()
+        self.consume(TokenType.RIGHT_PAREN, "Expect ')' after if condition.")
+        # Parse the then branch and the else branch
+        then_branch = self.statement()
+        else_branch = None
+        if self.match(TokenType.ELSE):
+            else_branch = self.statement()
+
+        return Stmt.If(condition, then_branch, else_branch)
 
     # Parse a print statement
     def print_statement(self) -> Stmt.Print:
@@ -204,6 +279,17 @@ class Parser:
 
         self.consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.")
         return Stmt.Var(name, initializer)
+
+    # Parse while statement
+    # Parses similarly to IF statement
+    def while_statement(self):
+        # Parse the condition, body, and return a While statement
+        self.consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'.")
+        condition = self.expression()
+        self.consume(TokenType.RIGHT_PAREN, "Expect ')' after condition.")
+        body = self.statement()
+
+        return Stmt.While(condition, body)
 
     # Parsing primary expressions, number, strings, false, true and NIL
     def primary(self):

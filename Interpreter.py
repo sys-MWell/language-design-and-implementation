@@ -7,6 +7,7 @@ from Environment import Environment
 
 class Interpreter():
     environment = Environment(enclosing=None)
+
     # Interpret expressions - Begin with execute function
     def interpret(self, statements):
         try:
@@ -43,6 +44,8 @@ class Interpreter():
     def execute(self, stmt):
         return stmt.accept(self)
 
+    ''' \/ Syntax tree nodes \/ '''
+
     # To execute a block
     # Method executes a list of statements in the context of a given environment
     # Field represents the current environment - the environment that corresponds to the innermost scope
@@ -66,10 +69,18 @@ class Interpreter():
     # Return object type
     def visitExpressionStmt(self, stmt):
         return_statement = self.evaluate(stmt.expression)
-        print(f"{self.stringify(return_statement)}")
+        #print(f"{self.stringify(return_statement)}")
         return return_statement
 
-    '''Syntax tree nodes'''
+    # Evaluate function if/else statements
+    # Looks for an else before returning, innermost call to a nested series will claim the else clause for itself
+    # before returning to the outer if statements.
+    def visitIfStmt(self, stmt):
+        if self.is_truthy(self.evaluate(stmt.condition)):
+            self.execute(stmt.thenBranch)
+        elif stmt.elseBranch is not None:
+            self.execute(stmt.elseBranch)
+        return None
 
     # Print statement’s visit method - Print outcome
     # Convert value to a string using the stringify() function
@@ -86,6 +97,11 @@ class Interpreter():
             value = self.evaluate(stmt.initialiser)
 
         self.environment.define(stmt.name.lexeme, value)
+        return None
+
+    def visitWhileStmt(self, stmt):
+        while self.is_truthy(self.evaluate(stmt.condition)):
+            self.execute(stmt.body)
         return None
 
     # Syntax tree - Evaluates the right-hand side to get the value, then stores it in the named variable

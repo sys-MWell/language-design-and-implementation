@@ -33,6 +33,9 @@ class Stmt(ABC):
         def accept(self, visitor):
             return visitor.visitClassStmt(self)
 
+        def __str__(self):
+            return f"{str(self.name)} {str(self.superclass)} {str(self.methods)}"
+
     # Represents an expression statement
     # Expression ";"
     # Called from Interpreter.Accept - Checks expression
@@ -59,6 +62,9 @@ class Stmt(ABC):
         def accept(self, visitor):
             return visitor.visitFunctionStmt(self)
 
+        def __str__(self):
+            return f"{str(self.name)} {str(self.params)} {str(self.body)}"
+
     # Represents an if statement
     # if statement conditionally executes statements
     # "if" "(" expression ")" statement ( "else" statement )?
@@ -70,6 +76,9 @@ class Stmt(ABC):
 
         def accept(self, visitor):
             return visitor.visitIfStmt(self)
+
+        def __str__(self):
+            return f"{str(self.condition)} {str(self.thenBranch)} {str(self.elseBranch)}"
 
     # Represents a print statement
     # Print statement evaluates an expression and displays the result to the user
@@ -94,6 +103,9 @@ class Stmt(ABC):
 
         def accept(self, visitor):
             return visitor.visitReturnStmt(self)
+
+        def __str__(self):
+            return f"{str(self.keyword)} {str(self.value)}"
 
     # Represents a variable declaration statement
     # Variable declarations are statements
@@ -120,6 +132,9 @@ class Stmt(ABC):
 
         def accept(self, visitor):
             return visitor.visitWhileStmt(self)
+
+        def __str__(self):
+            return f"{str(self.condition)} {str(self.body)}"
 
     @abstractmethod
     def accept(self, visitor):

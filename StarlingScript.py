@@ -9,7 +9,7 @@ hadError = False  # Track errors
 
 
 def main():
-    test_file = 'test_cases2.txt'
+    test_file = 'test_cases3.txt'
     run_file(test_file)
     if hadError:
         sys.exit(65)

@@ -26,3 +26,15 @@ var a = 1;
   var a = a + 2;
   print a;
 }
+
+var d = 3;
+var e = 4;
+
+if (d == e)
+{
+    print "d == e";
+}
+else
+{
+    print "d != e";
+}
