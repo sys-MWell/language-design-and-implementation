@@ -10,4 +10,4 @@ class Token:
 
     def __str__(self):
         # String representation of token object
-        return f"{self.type} {self.lexeme} {self.literal}"
+        return f"{self.type} {self.lexeme} {self.literal} {self.line}"

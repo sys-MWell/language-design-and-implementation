@@ -9,7 +9,7 @@ hadError = False  # Track errors
 
 
 def main():
-    test_file = 'test_cases3.txt'
+    test_file = 'test_cases4.txt'
     run_file(test_file)
     if hadError:
         sys.exit(65)
@@ -24,14 +24,14 @@ def run(src: str):
     scanner = Scanner(src)
     tokens = scanner.scan_tokens()
     for token in tokens:
-        print(f"token: {token}")
+        #print(f"token: {token}")
         pass
 
     parser = Parser(tokens)
     try:
         statements = parser.parse()
         for statement in statements:
-            print(f"parser: {statement}")
+            #print(f"parser: {statement}")
             pass
         interpreter = Interpreter()
         interpreter.interpret(statements)

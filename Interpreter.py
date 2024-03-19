@@ -3,6 +3,8 @@ from TokenType import TokenType
 from Expr import Expr
 from Stmt import Stmt
 from Environment import Environment
+from Callable import Callable
+from Function import Function
 
 
 class Interpreter():
@@ -39,6 +41,9 @@ class Interpreter():
         # Evaluate Assignment Expression
         elif isinstance(expr, Expr.Assign):
             return self.visitAssignExpr(expr)
+        # Evaluate Call Expression
+        elif isinstance(expr, Expr.Call):
+            return self.visitCallExpr(expr)
 
     # Execute - Accept Expressions
     def execute(self, stmt):
@@ -60,7 +65,7 @@ class Interpreter():
         finally:
             self.environment = previous
 
-    # Execute  - Block statements
+    # Execute - Block statements
     def visitBlockStmt(self, stmt):
         self.executeBlock(stmt.statements, Environment(self.environment))
         return None
@@ -71,6 +76,14 @@ class Interpreter():
         return_statement = self.evaluate(stmt.expression)
         #print(f"{self.stringify(return_statement)}")
         return return_statement
+
+    # Execute class statements
+    # Binds the resulting object to a new variable. A
+    # After creating Function, create a new binding in the current environment and store a reference to it there.
+    def visitFunctionStmt(self, stmt):
+        function = Function(stmt, self.environment)
+        self.environment.define(stmt.name.lexeme, function)
+        return None
 
     # Evaluate function if/else statements
     # Looks for an else before returning, innermost call to a nested series will claim the else clause for itself
@@ -130,7 +143,13 @@ class Interpreter():
         elif expr.operator.type == TokenType.MINUS:
             return left - right
         elif expr.operator.type == TokenType.PLUS:
-            return left + right
+            # If either operand is a string, treat the operation as string concatenation
+            if isinstance(left, str) or isinstance(right, str):
+                # Convert both operands to strings if at least one is a string
+                return str(left) + str(right)
+            else:
+                # Otherwise, proceed with numerical addition
+                return left + right
         elif expr.operator.type == TokenType.SLASH:
             return left / right
         elif expr.operator.type == TokenType.STAR:
@@ -145,6 +164,29 @@ class Interpreter():
             # Unexpected operator found
             print(f"Unexpected operator {expr}")
             return
+
+    # Evaluate call expressions
+    # Call expressions are used to invoke functions
+    # Call expressions are evaluated by first evaluating the callee expression
+    def visitCallExpr(self, expr):
+        callee = self.evaluate(expr.callee)
+
+        arguments = []
+        for argument in expr.arguments:
+            arguments.append(self.evaluate(argument))
+
+        # Check if the callee is a callable object
+        if not isinstance(callee, Callable):
+            raise RuntimeError(f"Can only call functions and classes. Line: {expr.paren.line}")
+        if not isinstance(callee, Callable):
+            raise TypeError("Callee must be an instance of Callable")
+
+        # Arity - fancy term for the number of arguments a function or operation expects.
+        # Check to see if the argument list’s length matches the callable’s arity.
+        if len(arguments) != callee.arity():
+            raise RuntimeError(f"Expected {callee.arity()} arguments but got {len(arguments)}. Line: {expr.paren.line}")
+
+        return callee.call(self, arguments)
 
     # Convert the literal tree node into a runtime value using Expr.Value
     def visitLiteralExpr(self, expr):

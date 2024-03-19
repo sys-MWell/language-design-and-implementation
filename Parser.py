@@ -37,6 +37,8 @@ class Parser:
     # Parsing the top-level declaration
     def declaration(self):
         # try:
+        if self.match(TokenType.FUN):
+            return self.function("function")
         if self.match(TokenType.VAR):
             return self.var_declaration()
 
@@ -135,7 +137,37 @@ class Parser:
             operator = self.previous()
             right = self.unary()
             return Expr.Unary(operator, right)
-        return self.primary()
+        # Return call expression if no unary operator
+        return self.call()
+
+    # Parsing function call expressions - from call to finish_call
+    # Arguments grammar rule: expression ( "," expression )* - also handle the zero-argument case
+    # Check if token is ). If it is, we don’t try to parse any arguments.
+    def finish_call(self, callee):
+        arguments = []
+        if not self.check(TokenType.RIGHT_PAREN):
+            while True:
+                # Reports an error if encounters too many arguments.
+                # Reports the error and keeps on going.
+                if len(arguments) >= 255:
+                    self.error(self.peek(), "Can't have more than 255 arguments.")
+                arguments.append(self.expression())
+                if not self.match(TokenType.COMMA):
+                    break
+
+        paren = self.consume(TokenType.RIGHT_PAREN, "Expect ')' after arguments.")
+        return Expr.Call(callee, paren, arguments)
+
+    # Parsing function call expressions
+    def call(self):
+        expr = self.primary()  # Check if primary
+        while True:
+            if self.match(TokenType.LEFT_PAREN):
+                expr = self.finish_call(expr)
+            else:
+                break
+        # Return primary expression if no function call
+        return expr
 
     # Parse chosen statements, if, print, block or expression
     def statement(self) -> Stmt.Print | Stmt.Expression | Stmt.Block | Stmt.If | Stmt.While:
@@ -237,6 +269,30 @@ class Parser:
                      "Expect ';' after expression.")  # Ensure there's a ';' after the expression
         expr_stmt = Stmt.Expression(expr)  # Return an Expression statement with the parsed expression
         return expr_stmt
+
+    # Parse a function declaration
+    def function(self, kind):
+        # Consumes the identifier token for the function’s name
+        # Will pass in “method” for 'kind' so error messages are specific to the kind of declaration being parsed.
+        name = self.consume(TokenType.IDENTIFIER, f"Expect {kind} name.")
+        self.consume(TokenType.LEFT_PAREN, f"Expect '(' after {kind} name.")
+        parameters = []
+        # Parse the parameters
+        if not self.check(TokenType.RIGHT_PAREN):
+            while True:
+                if len(parameters) >= 255:
+                    self.error(self.peek(), "Can't have more than 255 parameters.")
+
+                parameters.append(self.consume(TokenType.IDENTIFIER, "Expect parameter name."))
+
+                if not self.match(TokenType.COMMA):
+                    break
+        # Consume the right parenthesis token
+        self.consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.")
+        # Parse the body and wrap it all up in a function node
+        self.consume(TokenType.LEFT_BRACE, f"Expect '{{' before {kind} body.")
+        body = self.block()
+        return Stmt.Function(name, parameters, body)
 
     # Parse a block of statements
     # Creates an empty array and then parse statements and add them to the array until we reach the end of the block,
