@@ -11,6 +11,7 @@ Each method for parsing a grammar rule produces a syntax tree.
 '''
 
 class Parser:
+
     # Custom exception class for parse errors
     class ParseError(RuntimeError):
         pass
@@ -22,6 +23,7 @@ class Parser:
 
     # Parse the input expression
     def parse(self):
+        # raise Parser.ParseError("Forced error")
         statements = []
         # While not at end of token
         while not self.is_at_end():
@@ -30,17 +32,18 @@ class Parser:
 
     # Parsing the top-level expression
     def expression(self):
-        return self.logical_or()
+        return self.assignment()
 
+    # Parsing the top-level declaration
     def declaration(self):
-        try:
-            if self.match(TokenType.VAR):
-                return self.var_declaration()
+        # try:
+        if self.match(TokenType.VAR):
+            return self.var_declaration()
 
-            return self.statement()
-        except self.ParseError:
-            self.synchronise()
-            return None
+        return self.statement()
+        # except self.ParseError:
+        #     self.synchronise()
+        #     return None
 
     # Parsing logical OR expression: handles 'or' operators
     def logical_or(self):
@@ -135,9 +138,14 @@ class Parser:
         return self.primary()
 
     # Parse a single statement
-    def statement(self) -> Stmt.Print | Stmt.Expression:
+    def statement(self) -> Stmt.Print | Stmt.Expression | Stmt.Block:
         if self.match(TokenType.PRINT):  # If the current token is a print statement
             return self.print_statement()  # Parse and return a print statement
+        # Detect the beginning of a block by its leading token—in this case the {. In the statement() method
+        # If indenting a block -> E.g. local variable scope
+        if self.match(TokenType.LEFT_BRACE):
+            block_stmt = Stmt.Block(self.block())
+            return block_stmt
         return self.expression_statement()  # Otherwise, parse and return an expression statement
 
     # Parse a print statement
@@ -154,6 +162,37 @@ class Parser:
                      "Expect ';' after expression.")  # Ensure there's a ';' after the expression
         expr_stmt = Stmt.Expression(expr)  # Return an Expression statement with the parsed expression
         return expr_stmt
+
+    # Parse a block of statements
+    # Creates an empty array and then parse statements and add them to the array until we reach the end of the block,
+    # marked by the closing }
+    # is_at_end implement, avoid infinite loop, if closing } is missing parser will not get stuck
+    def block(self):
+        statements = []
+        # While not at the end of the block
+        while not self.check(TokenType.RIGHT_BRACE) and not self.is_at_end():
+            statements.append(self.declaration())
+        # Consume the right brace token
+        self.consume(TokenType.RIGHT_BRACE, "Expect '}' after block.")
+        return statements
+
+    # Check expression - expression assignment
+    # Returns an expression type e.g. Expr.Logical
+    def assignment(self):
+        # Check for logical or and logical and
+        expr = self.logical_or()
+
+        if self.match(TokenType.EQUAL):
+            equals = self.previous()
+            value = self.assignment()
+
+            if isinstance(expr, Expr.Variable):
+                name = Expr.Variable(expr.name)
+                return Expr.Assign(name, value)
+
+            raise self.error(equals, "Invalid assignment target.")
+
+        return expr
 
     # Parse variables
     def var_declaration(self):
@@ -242,11 +281,12 @@ class Parser:
 
     def display_error(self, token, message):
         if token.type == TokenType.EOF:
-            raise self.ParseError(f"Error at end of input: {message}")
-        if token.type == TokenType.NUMBER:
-            raise self.ParseError(f"SyntaxError: invalid syntax {token.lexeme}")
+            message = f"Error at end of input: {message}"
+        elif token.type == TokenType.NUMBER:
+            message = f"SyntaxError: invalid syntax {token.lexeme}"
         else:
-            raise self.ParseError(f"Error at '{token.lexeme}': {message}")
+            message = f"Error at '{token.lexeme}': {message}"
+        raise Parser.ParseError(message)
 
     def synchronise(self):
         self.advance()

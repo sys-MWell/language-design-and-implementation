@@ -7,52 +7,44 @@ from AstPrinter import AstPrinter
 
 hadError = False  # Track errors
 
+
 def main():
-    # Get the path to the test file from the command line argument
-    test_file = 'test_cases.txt'
-
+    test_file = 'test_cases2.txt'
     run_file(test_file)
+    if hadError:
+        sys.exit(65)
+
+def run_file(path: str):
+    with open(path, "r") as f:
+        run(f.read())
 
 
-def run_file(path):
-    # Open the file specified by the path in read mode
-    with open(path, 'r') as file:
-        # Iterate over each line in the file
-        for line in file:
-            # Remove trailing whitespace (including newline character)
-            line = line.rstrip()
-            # Run the scanner on the current line
-            run(line)
-            # Check if an error occurred during scanning
-            if hadError:
-                sys.exit(65)  # Exit with status code 65 (data format error)
-
-def run_input():
-    userinput = input()
-    run(userinput)
-    run_input()
-
-
-def run(source):
-    # Create a scanner object with the provided source code
-    print(f"source: {source}")
-    scanner = Scanner(source)
-    # Get the tokens by scanning the source code
+def run(src: str):
+    global hadError
+    scanner = Scanner(src)
     tokens = scanner.scan_tokens()
     for token in tokens:
         print(f"token: {token}")
-    # Expression parser
+        pass
+
     parser = Parser(tokens)
-    statements = parser.parse()
-    for statement in statements:
-        print(f"expression: {statement}")
-    # Stop if there was a syntax error
+    try:
+        statements = parser.parse()
+        for statement in statements:
+            print(f"parser: {statement}")
+            pass
+        interpreter = Interpreter()
+        interpreter.interpret(statements)
+    except Parser.ParseError as e:
+        print(f"Caught parse error: {e}", file=sys.stderr)
+        hadError = True
+
     if hadError:
-        print("Error")
         return
-    interpreter = Interpreter()
-    interpreter.interpret(statements)
-    print()
+
+# This is just after you try to parse the tokens
+if hadError:
+    sys.exit(65)  # Exit the program if there was a parse error
 
 
 def report(line, where, message):

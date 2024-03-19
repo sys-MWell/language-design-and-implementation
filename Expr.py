@@ -7,6 +7,7 @@ Expressions are the first syntax tree nodes we see
 The main Expr class defines the visitor interface used to dispatch against
  the specific expression types, and contains the other expression subclasses as nested classes.
 '''
+
 class Expr(ABC):
     def accept(self, visitor):
         method_name = 'visit' + self.__class__.__name__ + 'Expr'
@@ -22,6 +23,9 @@ class Expr(ABC):
         def __init__(self, name, value):
             self.name = name
             self.value = value
+
+        def __str__(self):
+            return f"{self.name} {self.value}"
 
     # Binary expression
     # The infix arithmetic (+, -, *, /) and logic operators (==, !=, <, <=, >, >=)
@@ -44,6 +48,9 @@ class Expr(ABC):
             self.paren = paren
             self.arguments = arguments
 
+        def __str__(self):
+            return f"({str(self.callee)} {str(self.paren)} {str(self.arguments)})"
+
     # Get expression
     # Property access, or “get” expressions
     # Expression object, token name
@@ -51,6 +58,9 @@ class Expr(ABC):
         def __init__(self, object, name):
             self.object = object
             self.name = name
+
+        def __str__(self):
+            return f"({str(self.object)} {str(self.name)})"
 
     # Grouping expression
     # Using parentheses to group expressions
@@ -93,6 +103,9 @@ class Expr(ABC):
             self.name = name
             self.value = value
 
+        def __str__(self):
+            return f"({str(self.object)} {str(self.name)} {str(self.value)})"
+
     # Super expression
     # Token keyword, Token method
     # Used for a method call - super access followed by a function call
@@ -101,11 +114,17 @@ class Expr(ABC):
             self.keyword = keyword
             self.method = method
 
+        def __str__(self):
+            return f"({str(self.keyword)} {str(self.method)})"
+
     # This expression
     # Evaluates to the instance that the method was called on
     class This():
         def __init__(self, keyword):
             self.keyword = keyword
+
+        def __str__(self):
+            return f"{str(self.keyword)}"
 
     # Unary expression
     # A prefix ! to perform a logical not, and - to negate a number

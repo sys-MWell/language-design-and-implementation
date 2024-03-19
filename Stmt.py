@@ -17,6 +17,9 @@ class Stmt(ABC):
         def accept(self, visitor):
             return visitor.visitBlockStmt(self)
 
+        def __str__(self):
+            return f"{str(self.statements)}"
+
     # Represents a class declaration statement
     # Interpret a class declaration statement
     # Token name, List<Stmt.Function> methods

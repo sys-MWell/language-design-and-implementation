@@ -11,7 +11,7 @@ class Interpreter():
     def interpret(self, statements):
         try:
             for statement in statements:
-                return self.execute(statement)
+                self.execute(statement)
         except RuntimeError as error:
             print(f"\033[91mErrror: {error}\033[0m")
 
@@ -35,26 +35,50 @@ class Interpreter():
         # Evaluate Variable Expression
         elif isinstance(expr, Expr.Variable):
             return self.visitVariableExpr(expr)
+        # Evaluate Assignment Expression
+        elif isinstance(expr, Expr.Assign):
+            return self.visitAssignExpr(expr)
 
     # Execute - Accept Expressions
     def execute(self, stmt):
         return stmt.accept(self)
 
+    # To execute a block
+    # Method executes a list of statements in the context of a given environment
+    # Field represents the current environment - the environment that corresponds to the innermost scope
+    # containing the code to be executed.
+    def executeBlock(self, statements, environment):
+        previous = self.environment
+        try:
+            self.environment = environment
+
+            for statement in statements:
+                self.execute(statement)
+        finally:
+            self.environment = previous
+
+    # Execute  - Block statements
+    def visitBlockStmt(self, stmt):
+        self.executeBlock(stmt.statements, Environment(self.environment))
+        return None
+
     # Load expressions - Call evaluate function - Evaluates expression type
     # Return object type
     def visitExpressionStmt(self, stmt):
         return_statement = self.evaluate(stmt.expression)
-        print(f"Expression statement: {self.stringify(return_statement)}")
+        print(f"{self.stringify(return_statement)}")
         return return_statement
+
+    '''Syntax tree nodes'''
 
     # Print statement’s visit method - Print outcome
     # Convert value to a string using the stringify() function
     def visitPrintStmt(self, stmt):
         value = self.evaluate(stmt.expression)
-        print(f"Print statement: {self.stringify(value)}")
+        print(f"{self.stringify(value)}")
         return None
 
-    # New syntax tree - Declaration statements
+    # Syntax tree - Declaration statements
     # If variable has initialiser, evaluate it, if not other choice
     def visitVarStmt(self, stmt):
         value = None
@@ -64,7 +88,17 @@ class Interpreter():
         self.environment.define(stmt.name.lexeme, value)
         return None
 
+    # Syntax tree - Evaluates the right-hand side to get the value, then stores it in the named variable
+    # Assignment variable expression
+    # StarlingScript can handle variable names longer than two characters
+    def visitAssignExpr(self, expr):
+        value = self.evaluate(expr.value)
+        name = expr.name.name
+        self.environment.assign(name, value)
+        return value
+
     # Evaluate binary expressions
+    # Evaluates left and right variable e.g. 10 > 5
     def visitBinaryExpr(self, expr):
         # Left and right binary expression
         left = self.evaluate(expr.left)

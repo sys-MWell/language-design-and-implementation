@@ -25,6 +25,8 @@ class Environment:
     def define(self, name, value):
         self.values[name] = value
 
+    # Assignment is not allowed to create a new variable
+    # - runtime error if the key does not already exist in the environment’s variable map
     def assign(self, name, value):
         if name.lexeme in self.values:
             self.values[name.lexeme] = value
