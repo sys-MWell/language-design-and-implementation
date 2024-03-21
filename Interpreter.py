@@ -17,7 +17,7 @@ class Interpreter():
             for statement in statements:
                 self.execute(statement)
         except RuntimeError as error:
-            print(f"\033[91mErrror: {error}\033[0m")
+            print(f"\033[91mError: {error}\033[0m")
 
     # Evaluate expressions, select evaluation method based on expression type
     def evaluate(self, expr):
@@ -185,7 +185,17 @@ class Interpreter():
     # Call expressions are used to invoke functions
     # Call expressions are evaluated by first evaluating the callee expression
     def visitCallExpr(self, expr):
-        callee = self.evaluate(expr.callee)
+        exprCheck = expr.callee.name.lexeme
+        if exprCheck == "input":  # Assuming callee is a string with the function name
+            # Handle input function
+            prompt = ""
+            if expr.arguments:
+                # Evaluate the first argument to use as the prompt
+                prompt = self.evaluate(expr.arguments[0])
+            user_input = input(prompt)
+            return user_input  # Return the user input to be used in the program
+        else:
+            callee = self.evaluate(expr.callee)
 
         arguments = []
         for argument in expr.arguments:

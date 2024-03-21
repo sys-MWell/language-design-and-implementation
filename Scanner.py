@@ -191,7 +191,22 @@ class Scanner:
             while self.is_digit(self.peek()):
                 self.advance()
 
-        self.add_token(TokenType.NUMBER, float(self.source[self.start:self.current]))
+        # Appropriately convert the input string to an int or float depending on number
+        input_str = self.source[self.start:self.current]
+        try:
+            # Try to convert to an integer
+            converted_input = int(input_str)
+            # Successful - Add the token as an integer
+            self.add_token(TokenType.NUMBER, converted_input)
+        except ValueError:
+            # Fails - try to convert to a float
+            try:
+                converted_input = float(input_str)
+                # Successful - Add the token as a float
+                self.add_token(TokenType.NUMBER, converted_input)
+            except ValueError:
+                # Fails - raise an error
+                raise self.ParseError(f"Invalid number at line {self.line}")
 
     # Handle string literals
     def string(self):
