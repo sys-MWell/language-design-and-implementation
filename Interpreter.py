@@ -5,6 +5,7 @@ from Stmt import Stmt
 from Environment import Environment
 from Callable import Callable
 from Function import Function
+from Return import Return
 
 
 class Interpreter():
@@ -55,6 +56,11 @@ class Interpreter():
     # Method executes a list of statements in the context of a given environment
     # Field represents the current environment - the environment that corresponds to the innermost scope
     # containing the code to be executed.
+    """
+    StarlingScript uses lexical scoping, which means that the scope of a variable is determined by:
+    A variable usage refers to the preceding declaration with the same name in the innermost 
+    scope that encloses the expression where the variable is used.
+    """
     def executeBlock(self, statements, environment):
         previous = self.environment
         try:
@@ -101,6 +107,16 @@ class Interpreter():
         value = self.evaluate(stmt.expression)
         print(f"{self.stringify(value)}")
         return None
+
+    # Evaluate return statements
+    # If we have a return value, we evaluate it, otherwise, we use nil
+    def visitReturnStmt(self, stmt):
+        value = None
+        if stmt.value is not None:
+            value = self.evaluate(stmt.value)
+
+        # Assuming 'Return' is a custom exception defined to handle return values in your interpreter
+        raise Return(value)
 
     # Syntax tree - Declaration statements
     # If variable has initialiser, evaluate it, if not other choice

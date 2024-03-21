@@ -1,6 +1,6 @@
 from Callable import Callable
 from Environment import Environment
-
+from Return import Return
 
 class Function(Callable):
     def __init__(self, declaration, closure):
@@ -12,7 +12,10 @@ class Function(Callable):
         for i in range(len(self.declaration.params)):
             environment.define(self.declaration.params[i].lexeme, arguments[i])
 
-        interpreter.executeBlock(self.declaration.body, environment)
+        try:
+            interpreter.executeBlock(self.declaration.body, environment)
+        except Return as returnValue:
+            return returnValue.value
         return None
 
     def arity(self):

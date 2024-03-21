@@ -177,6 +177,8 @@ class Parser:
             return self.if_statement()  # Parse and return an if statement
         if self.match(TokenType.PRINT):  # If the current token is a print statement
             return self.print_statement()  # Parse and return a print statement
+        if self.match(TokenType.RETURN):  # If the current token is a return statement
+            return self.return_statement()  # Parse and return a return statement
         if self.match(TokenType.WHILE):  # If the current token is a while statement
             return self.while_statement()  # Parse and return a while statement
         # Detect the beginning of a block by its leading token—in this case the {. In the statement() method
@@ -261,6 +263,15 @@ class Parser:
         self.consume(TokenType.SEMICOLON, "Expect ';' after value.")  # Ensure there's a ';' after the expression
         print_stmt = Stmt.Print(value)  # Return a Print statement with the parsed expression
         return print_stmt
+
+    # Parse a return statement
+    def return_statement(self):
+        keyword = self.previous()
+        value = None
+        if not self.check(TokenType.SEMICOLON):
+            value = self.expression()
+        self.consume(TokenType.SEMICOLON, "Expect ';' after return value.")
+        return Stmt.Return(keyword, value)
 
     # Parse an expression statement
     def expression_statement(self) -> Stmt.Expression:
