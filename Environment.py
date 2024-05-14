@@ -17,7 +17,7 @@ class Environment:
             return self.values[name.lexeme]
         if self.enclosing is not None:
             return self.enclosing.get(name)
-        raise RuntimeError(name, f"Undefined variable '{name.lexeme}'.")
+        raise RuntimeError(name, f"Undefined variable '{name.lexeme}' on line {name.line}")
 
     # Binds a new name to a value
     # Uses variable name as key, with value to be stored in

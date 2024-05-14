@@ -183,6 +183,7 @@ class Parser:
             return self.while_statement()  # Parse and return a while statement
         # Detect the beginning of a block by its leading token—in this case the {. In the statement() method
         # If indenting a block -> E.g. local variable scope
+        # Local variables use a parent-pointer tree structure to store variables in a stack of hash tables
         if self.match(TokenType.LEFT_BRACE):
             block_stmt = Stmt.Block(self.block())
             return block_stmt
@@ -260,7 +261,8 @@ class Parser:
     # Parse a print statement
     def print_statement(self) -> Stmt.Print:
         value = self.expression()  # Parse the expression to be printed
-        self.consume(TokenType.SEMICOLON, "Expect ';' after value.")  # Ensure there's a ';' after the expression
+        # Ensure there's a ';' after the expression
+        self.consume(TokenType.SEMICOLON, "Expect ';' after value, invalid expression.")
         print_stmt = Stmt.Print(value)  # Return a Print statement with the parsed expression
         return print_stmt
 
@@ -433,24 +435,11 @@ class Parser:
         return self.display_error(token, message)
 
     def display_error(self, token, message):
+        error_message = f"Error at line {token.line}\n"
         if token.type == TokenType.EOF:
-            message = f"Error at end of input: {message}"
+            error_message = error_message + f"Error at end of input: {message}"
         elif token.type == TokenType.NUMBER:
-            message = f"SyntaxError: invalid syntax {token.lexeme}"
+            error_message = error_message + f"SyntaxError: invalid syntax {token.lexeme}"
         else:
-            message = f"Error at '{token.lexeme}': {message}"
-        raise Parser.ParseError(message)
-
-    def synchronise(self):
-        self.advance()
-
-        while not self.is_at_end():
-            if self.previous().type == TokenType.SEMICOLON:
-                return
-
-            next_type = self.peek().type
-            if next_type in {TokenType.CLASS, TokenType.FUN, TokenType.VAR, TokenType.FOR, TokenType.IF,
-                             TokenType.WHILE, TokenType.PRINT, TokenType.RETURN}:
-                return
-
-            self.advance()
+            error_message = error_message + f"Error at '{token.lexeme}': {message}"
+        raise Parser.ParseError(error_message)

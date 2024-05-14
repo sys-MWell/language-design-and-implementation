@@ -1,3 +1,4 @@
+# Token.py
 from TokenType import TokenType
 
 class Token:

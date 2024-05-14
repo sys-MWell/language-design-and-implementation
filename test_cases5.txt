@@ -11,3 +11,14 @@ while (is_running == true) {
     shopping_list = shopping_list + ", " + item;
 }
 print shopping_list;
+
+var a = "global";
+{
+  fun showA() {
+    print a;
+  }
+
+  showA();
+  var a = "block";
+  showA();
+}

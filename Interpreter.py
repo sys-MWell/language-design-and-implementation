@@ -17,7 +17,7 @@ class Interpreter():
             for statement in statements:
                 self.execute(statement)
         except RuntimeError as error:
-            print(f"\033[91mError: {error}\033[0m")
+            print(f"\033[91mError: {error.args[1]}\033[0m")
 
     # Evaluate expressions, select evaluation method based on expression type
     def evaluate(self, expr):

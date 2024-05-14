@@ -12,6 +12,7 @@ class Scanner:
         self.line = 1  # Current line number
 
     # Dictionary mapping keywords to their corresponding token types
+    # Hashmap for keywords
     keywords = {
         "and": TokenType.AND,
         "class": TokenType.CLASS,
@@ -36,7 +37,6 @@ class Scanner:
         while not self.is_at_end():
             self.start = self.current
             self.scan_token()
-
         self.tokens.append(Token(TokenType.EOF, "", None, self.line))
         return self.tokens
 
@@ -129,8 +129,7 @@ class Scanner:
             self.identifier()
         else:
             # Unexpected character
-            raise self.ParseError(f"Unexpected character at line {self.line} with being {c}")
-            return
+            raise RuntimeError(f"Unexpected character at line {self.line} with being '{c}'")
 
     # Advance to the next character in the source code
     def advance(self):

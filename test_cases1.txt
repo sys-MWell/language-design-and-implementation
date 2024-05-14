@@ -1,5 +1,9 @@
 var one = 1;
 print one;
+print 1 == true;
+print true == 1;
+print true - true + 5;
+print true + 5 - true;
 print true == false;
 print 1 - 2;
 print 1 * -2;

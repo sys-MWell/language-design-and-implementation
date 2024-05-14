@@ -1,3 +1,5 @@
+#TokenType.py
+# Token Types
 from enum import Enum, auto
 
 class TokenType(Enum):
