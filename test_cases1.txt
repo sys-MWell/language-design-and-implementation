@@ -28,7 +28,7 @@ var floatTest = 1.0;
 var floatTest = floatTest + 5;
 print floatTest;
 var stringCatTest = "10 corgis ";
-var stringCatTest = stringCatTest + "5" + " more corgis";
+var stringCatTest = stringCatTest + 5 + " more corgis";
 print stringCatTest;
 print 9 + 10; 1 * 10;
 print 44 + 66;

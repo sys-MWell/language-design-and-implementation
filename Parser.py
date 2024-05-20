@@ -238,6 +238,7 @@ class Parser:
         # Initialiser, it runs once before the entire loop. Then again by replacing the whole statement with a block
         # that runs the initialiser.
         if initialiser is not None:
+            
             body = Stmt.Block([initialiser, body])
 
         return body
