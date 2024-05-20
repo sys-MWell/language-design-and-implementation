@@ -97,7 +97,7 @@ The project directory is structured as follows:<br>
 
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/yourusername/starling-script.git
+   git clone https://github.com/sys-MWell/language-design-and-implementation.git
    cd starling-script
 2. **Run the StarlingScript Application:**
    ```bash
