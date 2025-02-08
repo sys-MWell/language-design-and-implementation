@@ -1,8 +1,6 @@
 # Parser.py
 from TokenType import TokenType
-from Token import Token
 from Expr import Expr
-from typing import List
 from Stmt import Stmt
 '''
 Recursive descent - Top-down parser
@@ -195,7 +193,6 @@ class Parser:
     # Interpreter now supports C-style for loops
     def for_statement(self):
         self.consume(TokenType.LEFT_PAREN, "Expect '(' after 'for'.")
-
         # Translate 'for' to 'while' initialiser.
         # Check if token following the ( is a semicolon, if so initializer has been omitted.
         # Otherwise, check for a var keyword see if variable declaration.
@@ -238,7 +235,7 @@ class Parser:
         # Initialiser, it runs once before the entire loop. Then again by replacing the whole statement with a block
         # that runs the initialiser.
         if initialiser is not None:
-            
+
             body = Stmt.Block([initialiser, body])
 
         return body

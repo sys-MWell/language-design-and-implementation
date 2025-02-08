@@ -1,7 +1,6 @@
 # Environment.py
 """
-The bindings that associate variables to values need to be stored somewhere
-Parentheses, this data structure has been called an environment.
+The bindings that associate variables to values need to be stored somewhere.
 """
 
 
